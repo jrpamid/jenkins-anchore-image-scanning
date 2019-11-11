@@ -1,0 +1,72 @@
+version: "3.7"
+
+services:
+        # CICD Server (Jenkins)
+        jenkins:
+          image: "jenkins/jenkins"
+          ports:
+            - "8080:8080"
+            - "50000:50000"
+          networks:
+            aceit-docker-public-network:
+            aceit-docker-private-network:
+          volumes:
+            - working/jenkins/jenkins_home:/var/jenkins_home:rw
+        
+        # Anchore Engine Service
+        anchore-engine:
+          image: anchore/anchore-engine
+          depends_on:
+            - anchore-db
+          ports:
+            - "8228:8228"
+            - "8338:8338"
+          environment:
+            - ANCHORE_ENDPOINT_HOSTNAME=anchore-engine
+            - ANCHORE_HOST_ID=anchore-engine
+          networks:
+            aceit-docker-private-network:
+          volumes:
+            - working/anchore/config/:/config/:rw
+          logging:
+          driver: "json-file"
+          max-size: 100m
+                        
+        
+        # Anchore PostGre SQL Database
+        anchore-db:
+          image: "postgres:9"
+          ports:
+            - "2345:5432"
+          networks:
+             aceit-docker-private-network
+          volumes:
+            - working/anchore/db:/var/lib/postgresql/data/pgdata/:rw
+          logging:
+            driver: "json-file"
+            max-size: 100m
+                
+        # Anchore CLI container for any manual interaction
+        anchore-cli:
+          build: ./anchore-cli
+          image: anchore-cli:alpine
+          networks:
+             aceit-docker-private-network:
+             aceit-docker-public-network:
+          environment:
+            - ANCHORE_CLI_URL="http://anchore-engine:8228/v1"
+            - ANCHORE_CLI_USER="admin"
+            - ANCHORE_CLI_PASS="foobar"
+networks:
+   aceit-docker-public-network:
+   aceit-dcoer-private-network:
+        
+volumes:
+   working/jenkins/jenkins_home:
+   working/anchore/config:
+   working/anchore/db:
+        
+        
+                
+                        
+                        
