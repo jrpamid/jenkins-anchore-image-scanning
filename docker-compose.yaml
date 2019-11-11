@@ -11,7 +11,7 @@ services:
             - aceit-docker-public-network
             - aceit-docker-private-network
           volumes:
-            - "jenkins_home:/var/jenkins_home"
+            - "./working/jenkins_home:/var/jenkins_home"
         
         # Anchore Engine Service
         anchore-engine:
@@ -26,8 +26,9 @@ services:
             - ANCHORE_HOST_ID=anchore-engine
           networks:
             - aceit-docker-private-network
+            - aceit-docker-public-network
           volumes:
-            - "anchore_config/:/config/"
+            - "./working/anchore/config:/config"
                         
         
         # Anchore PostGre SQL Database
@@ -38,7 +39,7 @@ services:
           networks:
             - aceit-docker-private-network
           volumes:
-            - "anchore_db:/var/lib/postgresql/data/pgdata/"
+            - "./working/anchore/db:/var/lib/postgresql/data/pgdata/"
                 
         # Anchore CLI container for any manual interaction
         anchore-cli:
@@ -55,12 +56,3 @@ networks:
   aceit-docker-public-network:
   aceit-docker-private-network:
         
-volumes:
-  jenkins_home:
-  anchore_config:
-  anchore_db:
-        
-        
-                
-                        
-                        
