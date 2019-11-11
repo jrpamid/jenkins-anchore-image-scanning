@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3"
 
 services:
         # CICD Server (Jenkins)
@@ -8,10 +8,10 @@ services:
             - "8080:8080"
             - "50000:50000"
           networks:
-            aceit-docker-public-network:
-            aceit-docker-private-network:
+            - aceit-docker-public-network
+            - aceit-docker-private-network
           volumes:
-            - working/jenkins/jenkins_home:/var/jenkins_home:rw
+            - "jenkins_home:/var/jenkins_home"
         
         # Anchore Engine Service
         anchore-engine:
@@ -25,12 +25,9 @@ services:
             - ANCHORE_ENDPOINT_HOSTNAME=anchore-engine
             - ANCHORE_HOST_ID=anchore-engine
           networks:
-            aceit-docker-private-network:
+            - aceit-docker-private-network
           volumes:
-            - working/anchore/config/:/config/:rw
-          logging:
-          driver: "json-file"
-          max-size: 100m
+            - "anchore_config/:/config/"
                         
         
         # Anchore PostGre SQL Database
@@ -39,32 +36,29 @@ services:
           ports:
             - "2345:5432"
           networks:
-             aceit-docker-private-network
+            - aceit-docker-private-network
           volumes:
-            - working/anchore/db:/var/lib/postgresql/data/pgdata/:rw
-          logging:
-            driver: "json-file"
-            max-size: 100m
+            - "anchore_db:/var/lib/postgresql/data/pgdata/"
                 
         # Anchore CLI container for any manual interaction
         anchore-cli:
           build: ./anchore-cli
           image: anchore-cli:alpine
           networks:
-             aceit-docker-private-network:
-             aceit-docker-public-network:
+            - aceit-docker-private-network
+            - aceit-docker-public-network
           environment:
             - ANCHORE_CLI_URL="http://anchore-engine:8228/v1"
             - ANCHORE_CLI_USER="admin"
             - ANCHORE_CLI_PASS="foobar"
 networks:
-   aceit-docker-public-network:
-   aceit-dcoer-private-network:
+  aceit-docker-public-network:
+  aceit-docker-private-network:
         
 volumes:
-   working/jenkins/jenkins_home:
-   working/anchore/config:
-   working/anchore/db:
+  jenkins_home:
+  anchore_config:
+  anchore_db:
         
         
                 

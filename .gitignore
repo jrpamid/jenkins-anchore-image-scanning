@@ -11,8 +11,8 @@
 *.tar.gz
 *.rar
 
-working/jenkins/*
-working/anchore/db/*
+jenkins_home/*
+anchore_db/*
 
 *password*
 *secret*
