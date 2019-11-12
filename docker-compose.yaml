@@ -11,7 +11,7 @@ services:
             - aceit-docker-public-network
             - aceit-docker-private-network
           volumes:
-            - "./working/jenkins_home:/var/jenkins_home"
+            - "./working/jenkins_home:/var/lib/jenkins_home:rw"
         
         # Anchore Engine Service
         anchore-engine:
@@ -28,7 +28,7 @@ services:
             - aceit-docker-private-network
             - aceit-docker-public-network
           volumes:
-            - "./working/anchore/config:/config"
+            - "./working/anchore/config:/config:ro"
                         
         
         # Anchore PostGre SQL Database
@@ -38,8 +38,12 @@ services:
             - "2345:5432"
           networks:
             - aceit-docker-private-network
+            - aceit-docker-public-network
           volumes:
-            - "./working/anchore/db:/var/lib/postgresql/data/pgdata/"
+            - "./working/anchore/db:/var/lib/postgresql/data/pgdata/:rw"
+          environment:
+            - POSTGRES_PASSWORD=mysecretpassword
+            - PGDATA=/var/lib/postgresql/data/pgdata/
                 
         # Anchore CLI container for any manual interaction
         anchore-cli:
@@ -52,6 +56,15 @@ services:
             - ANCHORE_CLI_URL="http://anchore-engine:8228/v1"
             - ANCHORE_CLI_USER="admin"
             - ANCHORE_CLI_PASS="foobar"
+
+        # local docker registry v2
+        localregistry:
+          image: registry:2
+          ports:
+            - "5000:5000"
+          networks:
+            - aceit-docker-public-network
+
 networks:
   aceit-docker-public-network:
   aceit-docker-private-network:

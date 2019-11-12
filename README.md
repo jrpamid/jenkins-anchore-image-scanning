@@ -69,18 +69,59 @@ engine sync logs = /var/log/anchore/anchore-policy-engine.log
 [docs] https://wiki.jenkins.io/display/JENKINS/Anchore+Container+Image+Scanner+Plugin
 
 Download the github project. (https:/github.com/jrpamid/jenkins-anchore-image-scanning.git) 
-This contains the docker-compose.yaml file for starting up Jenkins, anchore-engine, postgreSql database and anchore-cli.
+```
+This project contains the docker-compose.yaml file for starting up Jenkins, anchore-engine, postgreSql database, local docker  regostry and anchore-cli.
 
+#### Start Jenkins, Anchore engine , PostGreSQL DB and anchore-cli stack 
+```
+git clone https://github.com/jrpamid/jenkins-anchore-image-scanning.git
+cd jenkins-anchore-image-scanning
+sudo docker-compose up -d
+# all the containers must be started
+sudo docker ps 
+```
 
-### Jenkins side configuration
+#### validate the startup logs of each container
+```
+sudo docker logs jenkins-anchore-image-scanning_anchore-engine_1
+sudo docker logs jenkins-anchore-image-scanning_anchore-db_1
+sudo docker logs jenkins-anchore-image-scanning_jenkins_1
+
+# validate the anchore-engine  reachability from anchore-cli container
+sudo docker network ls
+sudo docker run -it --network jenkins-anchore-image-scanning_aceit-docker-public-network anchore-cli:latest /bin/sh
+/ # anchore-cli image add jenkins/jenkins:latest
+/ # anchore-cli image list
+/ # anchore-cli image vuln jenkins/jenkins:latest
+```
+
+#### Jenkins first time set-up and configuration
+````
+# open jenkins url in browser
+http://<docker hostname>:8080
+
+# login using the default admin & password located at /var/jenkins_home/secrets/initialAdminPassword
+
+# Install  only the required plugins during startup
+
+# create a new jenkins admin user 
+
+# Make sure Jenkins is up to date, with no security vulnerabilities. 
+# if jenkins image is older, you can download the latest war file and copy to container
+sudo docker cp /tmp/jenkins.war jenkins:/var/
+
+````
+
+### Jenkins side anchore plugin configuration
 ```
 # Install the jenkins anchore plugin 
 Jenkins > Manage Jenkins > Manage Plugins > search for "Anchore Container Image Scanner Plugin "
 
+
 # Configure the Anchore plugin to  reach the anchore-engine
-Engine Url
+Jenkins > Manage Jenkins > Configure System
+Engine Url = http://anchore-engine:8228:v1
 Engine username = admin 
 Engine passwrod = foobar
 ```
-
 
